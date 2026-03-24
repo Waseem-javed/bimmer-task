@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Search Firmware Updates | Bimmer Firmware{% endblock %}
+
+{% block body %}
+<div class="container h-100 d-flex align-items-center justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">Find Your Update</h1>
+            <p class="text-muted lead">Enter your system details below to fetch the latest firmware.</p>
+        </div>
+
+        <div class="card p-4 p-md-5 shadow-lg border-0">
+            <form id="firmwareForm" class="row g-4">
+                <div class="col-md-6">
+                    <label for="hwVersion" class="form-label fw-semibold">Hardware Version</label>
+                    <input type="text" class="form-control form-control-lg bg-dark text-white border-secondary" 
+                           id="hwVersion" name="hwVersion" 
+                           placeholder="e.g. CPAA_2023.10.25" required>
+                    <div class="form-text text-muted small">Found in your system information.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="version" class="form-label fw-semibold">Current Software Version</label>
+                    <input type="text" class="form-control form-control-lg bg-dark text-white border-secondary" 
+                           id="version" name="version" 
+                           placeholder="e.g. v3.3.7" required>
+                    <div class="form-text text-muted small">Usually starts with 'v'.</div>
+                </div>
+                <div class="col-12 mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill py-3">
+                        <span id="btnText">Check for Updates</span>
+                        <span id="btnLoader" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </div>
+            </form>
+
+            <div id="result" class="mt-5"></div>
+        </div>
+        
+        <div class="row mt-5 text-center g-4">
+            <div class="col-md-4">
+                <div class="p-3">
+                    <h5 class="fw-bold">Fast Downloads</h5>
+                    <p class="text-muted small">Direct links to high-speed cloud storage.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3">
+                    <h5 class="fw-bold">Secure Files</h5>
+                    <p class="text-muted small">Verified firmware files for your safety.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3">
+                    <h5 class="fw-bold">Expert Support</h5>
+                    <p class="text-muted small">Contact us if you need help with installation.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        background-color: #252525 !important;
+        border-color: #00d2ff;
+        box-shadow: 0 0 0 0.25rem rgba(0, 210, 255, 0.25);
+        color: white;
+    }
+    .result-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 24px;
+        border-left: 4px solid #00d2ff;
+    }
+</style>
+
+<script>
+document.getElementById('firmwareForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const resultDiv = document.getElementById('result');
+    const btnText = document.getElementById('btnText');
+    const btnLoader = document.getElementById('btnLoader');
+    
+    // UI Feedback
+    btnText.textContent = 'Searching...';
+    btnLoader.classList.remove('d-none');
+    resultDiv.style.opacity = '0.5';
+
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch('{{ path('api_software_version') }}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        let html = '';
+        if (data.versionExist) {
+            html = `
+                <div class="result-card animate__animated animate__fadeInUp">
+                    <h4 class="fw-bold mb-3">${data.msg}</h4>
+                    <div class="row g-3 mt-2">
+                        ${data.link ? `<div class="col-12 col-sm-auto"><a href="${data.link}" class="btn btn-primary d-block" target="_blank">Download Update</a></div>` : ''}
+                        ${data.st ? `<div class="col-12 col-sm-auto"><a href="${data.st}" class="btn btn-outline-info d-block" target="_blank">ST Version</a></div>` : ''}
+                        ${data.gd ? `<div class="col-12 col-sm-auto"><a href="${data.gd}" class="btn btn-outline-light d-block" target="_blank">GD Version</a></div>` : ''}
+                    </div>
+                </div>`;
+        } else {
+            html = `<div class="alert alert-warning border-0 p-4 rounded-3">${data.msg}</div>`;
+        }
+        resultDiv.innerHTML = html;
+        resultDiv.style.opacity = '1';
+    } catch (error) {
+        resultDiv.innerHTML = '<div class="alert alert-danger border-0 p-4 rounded-3">An error occurred. Please check your connection and try again.</div>';
+        resultDiv.style.opacity = '1';
+    } finally {
+        btnText.textContent = 'Check for Updates';
+        btnLoader.classList.add('d-none');
+    }
+};
+</script>
+{% endblock %}

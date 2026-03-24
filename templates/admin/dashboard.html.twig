@@ -1,0 +1,92 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Dashboard Overview{% endblock %}
+
+{% block main %}
+    <div class="row g-4 mb-4">
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm bg-primary text-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">Total Versions</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_versions }}</h2>
+                    </div>
+                    <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                        <i class="fas fa-list fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\SoftwareVersionCrudController') }}" class="text-white text-decoration-none small">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm bg-success text-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">Latest Releases</h6>
+                        <h2 class="mb-0 fw-bold">{{ latest_versions|length }}</h2>
+                    </div>
+                    <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span class="small font-italic">Active production builds</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card border-0 shadow-sm bg-info text-white p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">System Status</h6>
+                        <h2 class="mb-0 fw-bold">Online</h2>
+                    </div>
+                    <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                        <i class="fas fa-server fa-2x"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span class="small">Database synced</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-4">Recently Added Versions</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>System Version</th>
+                        <th>Alt Version</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for version in latest_versions %}
+                        <tr>
+                            <td class="fw-semibold">{{ version.name }}</td>
+                            <td><code>{{ version.systemVersion }}</code></td>
+                            <td><code>{{ version.systemVersionAlt }}</code></td>
+                            <td>
+                                <span class="badge bg-success">Latest</span>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No recent versions found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
